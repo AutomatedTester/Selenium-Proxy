@@ -16,5 +16,6 @@ setup(name='SeleniumProxy',
                   'Topic :: Software Development :: Libraries',
                   'Programming Language :: Python'],
       py_modules=['selenium_proxy'],
-      install_requires=["mozrunner==5.2","mozprofile==0.2"]
+      # TODO(David) add Marionette when that is up on Pypi
+      install_requires=["mozrunner==5.2","mozprofile==0.2", "selenium"]
       )
