@@ -10,7 +10,7 @@ import traceback
 from errors import *
 from marionette import Marionette, HTMLElement
 from mozprofile.profile import Profile
-
+from mozrunner.runner import FirefoxRunner
 
 class SeleniumRequestServer(BaseHTTPServer.HTTPServer):
 
@@ -54,7 +54,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             data['value'] = value
         
-        print json.dumps(data)
         self.wfile.write(json.dumps(data))
 
     def process_request(self):
@@ -62,7 +61,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         path = self.path
         element = None
         m = self.pathRe.search(self.path)
-        print m
         if m:
             session = m.group(1)
             element = m.group(5)
@@ -77,12 +75,12 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
 
             path, body, session, element = self.process_request()
-            print "DELETE: path: %s; body: %s; session: %s; element: %s;" % (path, body, session, element)
 
             if path == '':
                 assert(session)
                 assert(self.server.marionette.delete_session())
                 self.send_JSON(session=session)
+                self.runner.stop()
             elif path == '/window':
                 assert(session)
                 assert(self.server.marionette.close_window())
@@ -99,7 +97,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
 
             path, body, session, element = self.process_request()
-            print "GET: path: %s; body: %s; session: %s; element: %s;" % (path, body, session, element)
 
             if path.startswith('/attribute/'):
                 assert(session)
@@ -165,7 +162,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
 
             path, body, session, element = self.process_request()
-            print "POST: path: %s; body: %s; session: %s; element: %s;" % (path, body, session, element)
 
             if path == '/back':
                 assert(session)
@@ -205,7 +201,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     result = self.server.marionette.execute_async_script(body['script'], script_args=body['args'])
                 else:
                     result = self.server.marionette.execute_async_script(body['script'])
-                print result
                 self.send_JSON(session=session, value=result)
             elif path == '/forward':
                 assert(session)
@@ -223,9 +218,16 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(self.server.marionette.refresh())
                 self.send_JSON(session=session)
             elif path == '/session':
+                profile = Profile()
+                profile.set_preferences([("marionette.defaultPrefs.enabled", "true"),
+                                        ("marionette.defaultPrefs.port", "2828")])
+                self.runner = FirefoxRunner(profile, "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
+                self.runner.start()
+                import time
+                time.sleep(10)
                 session = self.server.marionette.start_session()
-                # 'value' is the browser capabilities, which we're ignoring for now
                 self.send_JSON(session=session, value={})
+                # 'value' is the browser capabilities, which we're ignoring for now
             elif path == '/timeouts/async_script':
                 assert(session)
                 assert(self.server.marionette.set_script_timeout(body['ms']))
@@ -271,5 +273,5 @@ class SeleniumProxy(object):
         httpd.serve_forever()
 
 if __name__ == "__main__":
-    proxy = SeleniumProxy('localhost', 2626)
+    proxy = SeleniumProxy('localhost', 2828)
     proxy.start()
