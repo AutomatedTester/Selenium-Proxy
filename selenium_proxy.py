@@ -229,7 +229,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 profile.set_preferences(prefs['frozen'])
                 profile.set_preferences(prefs['mutable'])
                 profile.set_preferences({"marionette.defaultPrefs.enabled": True,
-                                        "marionette.defaultPrefs.port": 2828})
+                                        "marionette.defaultPrefs.port": self.server.marionette.port})
 
                 self.server.runner = FirefoxRunner(profile, 
                     "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
@@ -283,6 +283,14 @@ class SeleniumProxy(object):
                                       SeleniumRequestHandler)
         httpd.serve_forever()
 
+def free_port():
+    import socket
+    free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    free_socket.bind(('127.0.0.1', 0))
+    port = free_socket.getsockname()[1]
+    free_socket.close()
+    return port
+
 if __name__ == "__main__":
-    proxy = SeleniumProxy('localhost', 2828)
+    proxy = SeleniumProxy('localhost', free_port())
     proxy.start()
