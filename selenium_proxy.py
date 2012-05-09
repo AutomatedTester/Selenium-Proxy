@@ -219,8 +219,8 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_JSON(session=session)
             elif path == '/session':
                 profile = Profile()
-                profile.set_preferences([("marionette.defaultPrefs.enabled", "true"),
-                                        ("marionette.defaultPrefs.port", "2828")])
+                profile.set_preferences({"marionette.defaultPrefs.enabled": True,
+                                        "marionette.defaultPrefs.port": 2828})
                 self.runner = FirefoxRunner(profile, "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
                 self.runner.start()
                 import time
