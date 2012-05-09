@@ -16,6 +16,7 @@ class SeleniumRequestServer(BaseHTTPServer.HTTPServer):
 
     def __init__(self, marionette, *args, **kwargs):
         self.marionette = marionette
+        self.runner = None
         BaseHTTPServer.HTTPServer.__init__(self, *args, **kwargs)
 
     def __del__(self):
@@ -42,7 +43,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-
+        
         if data is None:
             data = {}
         if not 'status' in data:
@@ -80,7 +81,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(session)
                 assert(self.server.marionette.delete_session())
                 self.send_JSON(session=session)
-                self.runner.stop()
+                self.server.runner.stop()
             elif path == '/window':
                 assert(session)
                 assert(self.server.marionette.close_window())
@@ -221,8 +222,10 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 profile = Profile()
                 profile.set_preferences({"marionette.defaultPrefs.enabled": True,
                                         "marionette.defaultPrefs.port": 2828})
-                self.runner = FirefoxRunner(profile, "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
-                self.runner.start()
+
+                self.server.runner = FirefoxRunner(profile, 
+                    "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
+                self.server.runner.start()
                 import time
                 time.sleep(10)
                 session = self.server.marionette.start_session()
