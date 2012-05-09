@@ -4,6 +4,7 @@
 
 import BaseHTTPServer
 import json
+import os
 import re
 import traceback
 
@@ -219,7 +220,14 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(self.server.marionette.refresh())
                 self.send_JSON(session=session)
             elif path == '/session':
+                with open('webdriver.json') as webpref:
+                    read_prefs = webpref.read()
+
+                prefs = json.loads(read_prefs)
+
                 profile = Profile()
+                profile.set_preferences(prefs['frozen'])
+                profile.set_preferences(prefs['mutable'])
                 profile.set_preferences({"marionette.defaultPrefs.enabled": True,
                                         "marionette.defaultPrefs.port": 2828})
 
