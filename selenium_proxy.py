@@ -96,7 +96,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.error("Unknown path - %s" % session)
                 self.file_not_found()
 
-        except MarionetteException, e:
+        except MarionetteException as e:
             logger.error("Status: %s - Message: %s" % (e.status, e.message))
             self.send_JSON(data={'status': e.status}, value={'message': e.message})
         except:
@@ -175,7 +175,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.error("Unknown path - %s" % session)
                 self.file_not_found()
 
-        except MarionetteException, e:
+        except MarionetteException as e:
             logger.error("Status: %s - Message: %s" % (e.status, e.message))
             self.send_JSON(data={'status': e.status}, value={'message': e.message})
         except:
@@ -311,7 +311,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 ogger.error("Unknown path - %s" % session)
                 self.file_not_found()
 
-        except MarionetteException, e:
+        except MarionetteException as e:
             logger.error("Status: %s - Message: %s" % (e.status, e.message))
             self.send_JSON(data={'status': e.status}, value={'message': e.message})
         except:
