@@ -303,7 +303,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(self.server.marionette.switch_to_window(body['name']))
                 self.send_JSON(session=session)
             else:
-                ogger.error("Unknown path - %s" % session)
+                logger.error("Unknown path - %s" % session)
                 self.file_not_found()
 
         except MarionetteException as e:
