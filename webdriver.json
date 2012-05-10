@@ -49,6 +49,6 @@
     "dom.max_script_run_time": 30,
     "dom.report_all_js_exceptions": true,
     "javascript.options.showInConsole": true,
-    "network.http.max-connections-per-server": 10,
+    "network.http.max-connections-per-server": 10
   }
 }
