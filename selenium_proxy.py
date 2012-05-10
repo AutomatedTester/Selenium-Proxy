@@ -4,7 +4,6 @@
 
 import BaseHTTPServer
 import json
-import os
 import re
 import traceback
 
