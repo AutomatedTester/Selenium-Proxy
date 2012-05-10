@@ -155,12 +155,6 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(session)
                 self.send_JSON(value=self.server.marionette.get_url(),
                                session=session)
-            elif path == '/value':
-                logger.info("Getting Attribute %s - %s" % (element, session)) 
-                assert(session)
-                marionette_element = HTMLElement(self.server.marionette, element)
-                send.send_JSON(session=session,
-                               value=marionette_element.value())
             elif path == '/window_handle':
                 logger.info("Getting window handle - %s" % session)
                 assert(session)
@@ -297,6 +291,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(self.server.marionette.navigate(body['url']))
                 self.send_JSON(session=session)
             elif path == '/value':
+                logger.info("Send Keys %s - %s" % (''.join(body['value']), session))
                 assert(session)
                 keys = ''.join(body['value'])
                 marionette_element = HTMLElement(self.server.marionette, element)
