@@ -237,7 +237,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(self.server.marionette.go_forward())
                 self.send_JSON(session=session)
             elif path == '/frame':
-                logger.info("Switch to Frame %s - %s" % (body['name'], session))
+                logger.info("Switch to Frame %s - %s" % (body['id'], session))
                 assert(session)
                 frame = body['id']
                 if isinstance(frame, dict) and 'ELEMENT' in frame:
