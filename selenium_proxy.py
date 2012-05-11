@@ -16,8 +16,8 @@ from mozrunner.runner import FirefoxRunner
 
 class SeleniumRequestServer(BaseHTTPServer.HTTPServer):
 
-    def __init__(self, marionette, *args, **kwargs):
-        self.marionette = marionette
+    def __init__(self, *args, **kwargs):
+        self.marionette = None
         self.runner = None
         BaseHTTPServer.HTTPServer.__init__(self, *args, **kwargs)
 
@@ -256,13 +256,14 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     read_prefs = webpref.read()
 
                 prefs = json.loads(read_prefs)
+                port = free_port()
 
                 logger.debug("Creating Profile")
                 profile = Profile()
                 profile.set_preferences(prefs['frozen'])
                 profile.set_preferences(prefs['mutable'])
                 profile.set_preferences({"marionette.defaultPrefs.enabled": True,
-                                        "marionette.defaultPrefs.port": self.server.marionette.port})
+                                        "marionette.defaultPrefs.port": port})
 
                 logger.debug("Profile created")
                 logger.debug("Creating runner")
@@ -272,6 +273,8 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.debug("Browser has been started")
                 import time
                 time.sleep(10)
+                logger.info("Creating Marionette instance on %s:%s" % ("localhost", port)) 
+                self.server.marionette = Marionette("localhost", port)
                 session = self.server.marionette.start_session()
                 self.send_JSON(session=session, value={})
                 # 'value' is the browser capabilities, which we're ignoring for now
@@ -316,17 +319,14 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class SeleniumProxy(object):
 
-    def __init__(self, remote_host, remote_port, proxy_port=4444):
+    def __init__(self, remote_host='localhost', proxy_port=4444):
         self.remote_host = remote_host
-        self.remote_port = remote_port
         self.proxy_port = proxy_port
 
     def start(self):
-        marionette = Marionette(self.remote_host, self.remote_port)
-        logger.info("Starting the Selenium Proxy. Marionette is running on %s:%s" \
-                     % (self.remote_host, self.remote_port) )
-        httpd = SeleniumRequestServer(marionette,
-                                      ('127.0.0.1', self.proxy_port),
+        logger.info("Starting the Selenium Proxy. Server is running is running on %s:%s" \
+                     % ("localhost", self.proxy_port) )
+        httpd = SeleniumRequestServer(('127.0.0.1', self.proxy_port),
                                       SeleniumRequestHandler)
         httpd.serve_forever()
 
@@ -346,5 +346,5 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    proxy = SeleniumProxy('localhost', free_port())
+    proxy = SeleniumProxy()
     proxy.start()
