@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     # Start the selenium proxy on port 4444, connecting to the test server
     # on port 2626.
-    proxy = SeleniumProxy('127.0.0.1', 2626, proxy_port=4444)
+    proxy = SeleniumProxy('127.0.0.1', proxy_port=4444)
     proxy_thread = threading.Thread(target=proxy.start)
     proxy_thread.daemon = True
     proxy_thread.start()
