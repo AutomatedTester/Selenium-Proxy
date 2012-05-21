@@ -14,6 +14,13 @@ from mozprofile.profile import Profile
 from mozrunner.runner import FirefoxRunner
 
 
+logger = logging.getLogger('Selenium-Proxy')
+ch = logging.FileHandler('selenium-proxy.log')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 class SeleniumRequestServer(BaseHTTPServer.HTTPServer):
 
     def __init__(self, *args, **kwargs):
@@ -339,12 +346,5 @@ def free_port():
     return port
 
 if __name__ == "__main__":
-    logger = logging.getLogger('Selenium-Proxy')
-    ch = logging.FileHandler('selenium-proxy.log')
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
     proxy = SeleniumProxy()
     proxy.start()
