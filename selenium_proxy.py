@@ -142,7 +142,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 marionette_element = HTMLElement(self.server.marionette, element)
                 other_element = HTMLElement(self.server.marionette, other)
                 self.send_JSON(session=session,
-                               value=marionette_element.equals(other))
+                               value=marionette_element.equals(other_element))
             elif path == '/selected':
                 logger.info("Selected %s - %s" % (element, session)) 
                 assert(session)
