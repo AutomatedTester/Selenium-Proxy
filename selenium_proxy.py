@@ -272,7 +272,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 profile.set_preferences({"marionette.defaultPrefs.enabled": True,
                                         "marionette.defaultPrefs.port": port})
 
-                logger.debug("Profile created")
+                logger.debug("Profile created at %s" % profile.profile)
                 logger.debug("Creating runner")
                 self.server.runner = FirefoxRunner(profile, 
                     "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
