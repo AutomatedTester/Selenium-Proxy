@@ -8,7 +8,7 @@ import re
 import traceback
 import logging
 
-from errors import *
+from marionette.errors import MarionetteException
 from marionette import Marionette, HTMLElement
 from mozprofile.profile import Profile
 from mozrunner.runner import FirefoxRunner
@@ -213,30 +213,31 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 # find element variants
                 assert(session)
                 self.send_JSON(session=session,
-                               value={'ELEMENT': str(self.server.marionette.find_element(body['using'], body['value'], id=element))})
+                               value={'ELEMENT': self.server.marionette.find_element(body['using'], body['value'], id=element).id})
             elif path == '/elements':
                 logger.info("Find Elements using - %s, value - %s  - %s" \
                             % (body['using'], body['value'], session)) 
                 # find elements variants
                 assert(session)
                 self.send_JSON(session=session,
-                               value=[{'ELEMENT': str(x)} for x in self.server.marionette.find_elements(body['using'], body['value'])])
+                               value=[{'ELEMENT': x.id} for x in self.server.marionette.find_elements(body['using'], body['value'])])
             elif path == '/execute':
                 logger.info("Executing Script - %s" % session)
                 assert(session)
                 if body['args']:
-                    result = self.server.marionette.execute_script(body['script'], script_args=body['args'])
+                    result = self.server.marionette.execute_script(body['script'], script_args=body['args'],
+                                                            new_sandbox=False)
                 else:
-                    result = self.server.marionette.execute_script(body['script'])
+                    result = self.server.marionette.execute_script(body['script'],new_sandbox=False)
                 self.send_JSON(session=session, value=result)
             elif path == '/execute_async':
                 logger.info("Executing Async Script - %s" % session)
                 assert(session)
                 result = None
                 if body['args']:
-                    result = self.server.marionette.execute_async_script(body['script'], script_args=body['args'])
+                    result = self.server.marionette.execute_async_script(body['script'], script_args=body['args'], new_sandbox=False)
                 else:
-                    result = self.server.marionette.execute_async_script(body['script'])
+                    result = self.server.marionette.execute_async_script(body['script'], new_sandbox=False)
                 self.send_JSON(session=session, value=result)
             elif path == '/forward':
                 logger.info("Forwarding - %s" % session)
