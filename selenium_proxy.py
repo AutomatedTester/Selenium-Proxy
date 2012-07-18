@@ -166,12 +166,17 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.info("Getting window handle - %s" % session)
                 assert(session)
                 self.send_JSON(session=session,
-                               value=self.server.marionette.get_window())
+                               value=self.server.marionette.current_window_handle)
             elif path == '/window_handles':
                 logger.info("Getting window handles - %s" % session)
                 assert(session)
                 self.send_JSON(session=session,
-                               value=self.server.marionette.get_windows())
+                               value=self.server.marionette.window_handles)
+            elif path == '/title':
+                logger.info("Getting Window Title")
+                assert(session)
+                self.send_JSON(session=session,
+                            value=self.server.marionette.title)
             else:
                 logger.error("Unknown path - %s" % session)
                 self.file_not_found()
