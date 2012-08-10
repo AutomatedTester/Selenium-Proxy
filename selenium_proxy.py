@@ -129,7 +129,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(session)
                 marionette_element = HTMLElement(self.server.marionette, element)
                 self.send_JSON(session=session,
-                               value=marionette_element.displayed())
+                               value=marionette_element.is_displayed())
             elif path == '/enabled':
                 logger.info("Enabled %s - %s" % (element, session)) 
                 assert(session)
@@ -156,7 +156,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(session)
                 marionette_element = HTMLElement(self.server.marionette, element)
                 self.send_JSON(session=session,
-                               value=marionette_element.text())
+                               value=marionette_element.text)
             elif path == '/url':
                 logger.info("Getting url - %s" % session)
                 assert(session)
@@ -177,6 +177,12 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 assert(session)
                 self.send_JSON(session=session,
                             value=self.server.marionette.title)
+            elif path == "/name":
+                logger.info("Getting element tag name")
+                assert(session)
+                marionette_element = HTMLElement(self.server.marionette, element)
+                self.send_JSON(session=session,
+                            value=marionette_element.tag_name)
             else:
                 logger.error("Unknown path - %s" % session)
                 self.file_not_found()
@@ -281,7 +287,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.debug("Profile created at %s" % profile.profile)
                 logger.debug("Creating runner")
                 self.server.runner = FirefoxRunner(profile, 
-                    "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin")
+                    "/home/davidburns/mozilla-central/obj-dbg-linux/dist/bin/firefox-bin")
                 self.server.runner.start()
                 logger.debug("Browser has been started")
                 import time
