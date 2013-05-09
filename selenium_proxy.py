@@ -4,9 +4,11 @@
 
 import BaseHTTPServer
 import json
+import logging
+import os
+import platform
 import re
 import traceback
-import logging
 
 from marionette.errors import MarionetteException
 from marionette import Marionette, HTMLElement
@@ -286,8 +288,8 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 logger.debug("Profile created at %s" % profile.profile)
                 logger.debug("Creating runner")
-                self.server.runner = FirefoxRunner(profile, 
-                    "/home/davidburns/mozilla-central/obj-dbg-linux/dist/bin/firefox-bin")
+                firefox_binary = body["desiredCapabilities"]['firefoxBinary'] if body["desiredCapabilities"]['firefoxBinary'] else firefox_binary_path()
+                self.server.runner = FirefoxRunner(profile, firefox_binary)
                 self.server.runner.start()
                 logger.debug("Browser has been started")
                 import time
@@ -356,6 +358,67 @@ def free_port():
     port = free_socket.getsockname()[1]
     free_socket.close()
     return port
+
+def firefox_binary_path():
+    start_cmd = ""
+    if platform.system() == "Darwin":
+        start_cmd = ("/Applications/Firefox.app/Contents/MacOS/firefox-bin")
+    elif platform.system() == "Windows":
+        start_cmd = (_find_exe_in_registry() or 
+                     _default_windows_location())
+    elif platform.system() == 'Java' and os._name == 'nt':
+        start_cmd = _default_windows_location()
+    else:
+        for ffname in ["firefox", "iceweasel"]:
+            start_cmd = _which(ffname)
+            if start_cmd is not None:
+                break
+            else:
+                # couldn't find firefox on the system path
+                raise RuntimeError("Could not find firefox in your system PATH." + 
+                                   " Please specify the firefox binary location or install firefox")
+    return start_cmd
+
+def _find_exe_in_registry():
+    try:
+        from _winreg import OpenKey, QueryValue, HKEY_LOCAL_MACHINE
+    except ImportError:
+        from winreg import OpenKey, QueryValue, HKEY_LOCAL_MACHINE
+    import shlex
+    keys = (
+            r"SOFTWARE\Classes\FirefoxHTML\shell\open\command",
+            r"SOFTWARE\Classes\Applications\firefox.exe\shell\open\command"
+           )
+    command = ""
+    for path in keys:
+        try:
+            key = OpenKey(HKEY_LOCAL_MACHINE, path)
+            command = QueryValue(key, "")
+            break
+        except OSError:
+            pass
+        else:
+            return ""
+    return shlex.split(command)[0]
+
+
+def _default_windows_location():
+    program_files = [os.getenv("PROGRAMFILES", r"C:\Program Files"),
+                     os.getenv("PROGRAMFILES(X86)", r"C:\Program Files (x86)")]
+    for path in program_files:
+        binary_path = os.path.join(path, r"Mozilla Firefox\firefox.exe")
+        if os.access(binary_path, os.X_OK):
+            return binary_path
+    return ""
+
+def _which(fname):
+    """Returns the fully qualified path by searching Path of the given name"""
+    for pe in os.environ['PATH'].split(os.pathsep):
+        checkname = os.path.join(pe, fname)
+        if os.access(checkname, os.X_OK) and not os.path.isdir(checkname):
+            return checkname
+    return None
+
 
 if __name__ == "__main__":
     proxy = SeleniumProxy()
