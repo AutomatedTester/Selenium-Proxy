@@ -9,6 +9,7 @@ import os
 import platform
 import re
 import traceback
+import urllib
 
 from marionette.errors import MarionetteException
 from marionette import Marionette, HTMLElement
@@ -54,7 +55,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        
+
         if data is None:
             data = {}
         if not 'status' in data:
@@ -65,7 +66,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             data['value'] = {}
         else:
             data['value'] = value
-        
+
         self.wfile.write(json.dumps(data))
 
     def process_request(self):
@@ -76,11 +77,13 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if m:
             session = m.group(1)
             element = m.group(5)
+            if element is not None:
+                element = urllib.unquote(element)
             path = '/%s' % m.group(6) if m.group(6) else ''
         content_len = self.headers.getheader('content-length')
         if content_len:
             body = json.loads(self.rfile.read(int(content_len)))
-        
+
         return path, body, session, element
 
     def do_DELETE(self):
