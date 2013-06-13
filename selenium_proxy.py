@@ -295,10 +295,9 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.server.runner = FirefoxRunner(profile, firefox_binary)
                 self.server.runner.start()
                 logger.debug("Browser has been started")
-                import time
-                time.sleep(10)
                 logger.info("Creating Marionette instance on %s:%s" % ("localhost", port)) 
                 self.server.marionette = Marionette("localhost", port)
+                self.server.marionette.wait_for_port()
                 session = self.server.marionette.start_session()
                 self.send_JSON(session=session, value={})
                 # 'value' is the browser capabilities, which we're ignoring for now
