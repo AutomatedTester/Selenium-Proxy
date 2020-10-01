@@ -39,19 +39,19 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     pathRe = re.compile(r'/session/(.*?)($|/((\w+/(.*?)/)?(.*)))')
 
-    def server_error(self, error):
+      def server_error(self, error):
         self.send_response(500)
         self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps({'status': 500, 'value': {'message': error}}))
 
-    def file_not_found(self):
+      def file_not_found(self):
         self.send_response(404)
         self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps({'status': 404, 'value': {'message': '%s not found' % self.path}}))
 
-    def send_JSON(self, data=None, session=None, value=None):
+      def send_JSON(self, data=None, session=None, value=None):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
@@ -69,7 +69,7 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         self.wfile.write(json.dumps(data))
 
-    def process_request(self):
+      def process_request(self):
         session = body = None
         path = self.path
         element = None
@@ -129,69 +129,79 @@ class SeleniumRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 marionette_element = HTMLElement(self.server.marionette, element)
                 self.send_JSON(session=session,
                                value=marionette_element.get_attribute(name))
-            elif path == '/displayed':
+             elif path == '/displayed':
                 logger.info("Displayed %s - %s" % (element, session)) 
                 assert(session)
                 marionette_element = HTMLElement(self.server.marionette, element)
                 self.send_JSON(session=session,
                                value=marionette_element.is_displayed())
-            elif path == '/enabled':
-                logger.info("Enabled %s - %s" % (element, session)) 
-                assert(session)
-                marionette_element = HTMLElement(self.server.marionette, element)
-                self.send_JSON(session=session,
+                elif path == '/enabled':
+                 logger.info("Enabled %s - %s" % (element, session)) 
+                 assert(session)
+                 marionette_element = HTMLElement(self.server.marionette, element)
+                 self.send_JSON(session=session,
                                value=marionette_element.enabled())
-            elif path.startswith('/equals/'):
-                assert(session)
-                other = path[len('/equals'):]
-                marionette_element = HTMLElement(self.server.marionette, element)
-                other_element = HTMLElement(self.server.marionette, other)
-                self.send_JSON(session=session,
+                   elif path.startswith('/equals/'):
+                   assert(session)
+                   other = path[len('/equals'):]
+                   marionette_element = HTMLElement(self.server.marionette, element)
+                   other_element = HTMLElement(self.server.marionette, other)
+                   self.send_JSON(session=session,
                                value=marionette_element.equals(other_element))
-            elif path == '/selected':
-                logger.info("Selected %s - %s" % (element, session)) 
-                assert(session)
-                marionette_element = HTMLElement(self.server.marionette, element)
-                self.send_JSON(session=session,
+                
+                      elif path == '/selected':
+                      logger.info("Selected %s - %s" % (element, session)) 
+                      assert(session)
+                      marionette_element = HTMLElement(self.server.marionette, element)
+                      self.send_JSON(session=session,
                                value=marionette_element.selected())
-            elif path == '/status':
-                self.send_JSON(data=self.server.marionette.status())
-            elif path == '/text':
-                logger.info("Getting text %s - %s" % (element, session)) 
-                assert(session)
-                marionette_element = HTMLElement(self.server.marionette, element)
-                self.send_JSON(session=session,
-                               value=marionette_element.text)
-            elif path == '/url':
-                logger.info("Getting url - %s" % session)
-                assert(session)
-                self.send_JSON(value=self.server.marionette.get_url(),
-                               session=session)
-            elif path == '/window_handle':
-                logger.info("Getting window handle - %s" % session)
-                assert(session)
-                self.send_JSON(session=session,
-                               value=self.server.marionette.current_window_handle)
-            elif path == '/window_handles':
-                logger.info("Getting window handles - %s" % session)
-                assert(session)
-                self.send_JSON(session=session,
-                               value=self.server.marionette.window_handles)
-            elif path == '/title':
-                logger.info("Getting Window Title")
-                assert(session)
-                self.send_JSON(session=session,
-                            value=self.server.marionette.title)
-            elif path == "/name":
-                logger.info("Getting element tag name")
-                assert(session)
-                marionette_element = HTMLElement(self.server.marionette, element)
-                self.send_JSON(session=session,
-                            value=marionette_element.tag_name)
-            else:
-                logger.error("Unknown path - %s" % session)
-                self.file_not_found()
+                        
+                         elif path == '/status':
+                           self.send_JSON(data=self.server.marionette.status())
+                        
+                             elif path == '/text':
+                             logger.info("Getting text %s - %s" % (element, session)) 
+                             assert(session)
+                             marionette_element = HTMLElement(self.server.marionette, element)
+                             self.send_JSON(session=session,
+                                value=marionette_element.text)
+                                
+                                  elif path == '/url':
+                                  logger.info("Getting url - %s" % session)
+                                  assert(session)
+                                  self.send_JSON(value=self.server.marionette.get_url(),
+                                  session=session)
+                                
+                                     elif path == '/window_handle':
+                                     logger.info("Getting window handle - %s" % session)
+                                     assert(session)
+                                     self.send_JSON(session=session,
+                                         value=self.server.marionette.current_window_handle)
+                
+                                        elif path == '/window_handles':
+                                        logger.info("Getting window handles - %s" % session)
+                                        assert(session)
+                                        self.send_JSON(session=session,
+                                           value=self.server.marionette.window_handles)
+                
+                                           elif path == '/title':
+                                           logger.info("Getting Window Title")
+                                           assert(session)
+                                           self.send_JSON(session=session,
+                                                 value=self.server.marionette.title)
+                
+                                                      elif path == "/name":
+                                                      logger.info("Getting element tag name")
+                                                      assert(session)
+                                                      marionette_element = HTMLElement(self.server.marionette, element)
+                                                      self.send_JSON(session=session,
+                                                      value=marionette_element.tag_name)
+                
+                                                          else:
+                                                          logger.error("Unknown path - %s" % session)
+                                                          self.file_not_found()
 
+                
         except MarionetteException as e:
             logger.error("Status: %s - Message: %s" % (e.status, e.message))
             self.send_JSON(data={'status': e.status}, value={'message': e.message})
